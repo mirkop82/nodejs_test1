@@ -1,6 +1,7 @@
 var ObjectID = require('mongodb').ObjectID;
 
-module.exports = function(app, db) {
+module.exports = function(app, db, es) {
+
   app.get('/notes/:id', (req, res) => {
     const id = req.params.id;
     const details = { '_id': new ObjectID(id) };
@@ -24,4 +25,33 @@ module.exports = function(app, db) {
       }
     });
   });
+
+  app.get('/es/:word', (req,res) => {
+      const myword = req.params.word;
+      es.search({
+        index: 'test1',
+        body: {
+          query: {
+            match: { "Reviews.Title": myword }
+          },
+        }
+      },function (error, response,status) {
+        if (error){
+          console.log("search error: "+error)
+        }
+        else {
+          console.log("--- Response ---");
+          console.log(response);
+          console.log("--- Hits ---");
+          //res.setHeader('Content-Type', 'application/json');
+          res.writeHead(200, {'Content-Type': 'application/json'})
+          //res.write('')
+          response.hits.hits.forEach(function(hit){
+            res.write(JSON.stringify(hit));
+          })
+          res.end()
+        }
+      });
+  });
+
 };

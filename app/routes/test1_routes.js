@@ -31,6 +31,7 @@ module.exports = function(app, db, es) {
       es.search({
         index: 'test1',
         body: {
+          _source: ["Reviews.Title","Reviews.Content"],
           query: {
             match: { "Reviews.Title": myword }
           },
@@ -45,11 +46,12 @@ module.exports = function(app, db, es) {
           console.log("--- Hits ---");
           //res.setHeader('Content-Type', 'application/json');
           res.writeHead(200, {'Content-Type': 'application/json'})
-          //res.write('')
+          res.write('{"response":[')
           response.hits.hits.forEach(function(hit){
             res.write(JSON.stringify(hit));
+            res.write(',')
           })
-          res.end()
+          res.end('{}]}')
         }
       });
   });
